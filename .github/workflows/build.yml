@@ -55,12 +55,13 @@ jobs:
       - name: Build Ruby
         run: |
           prefix="${HOME}/.rubies/${RUBYVER}+${CC}"
-          ./ruby-build/bin/ruby-build "$RUBYVER" ${prefix}
-          tar cf "$KEY".tar.zst -C ruby .
-          oras push --artifact-type=application/x-tar+zstd ghcr.io/hanazuki/ruby-builder:"$KEY" "$KEY".tar.zst
+          mkdir -p "$prefix"
+          ./ruby-build/bin/ruby-build "$RUBYVER" "$prefix"
+          tar cPf ruby.tar.zst "$prefix"
+          oras push --artifact-type=application/x-tar+zstd "$TAG" ruby.tar.zst
         env:
           RUBYVER: ${{ matrix.ruby }}
-          KEY: ${{ matrix.artifact_tag }}
+          TAG: ${{ matrix.artifact_tag }}
 
   commit:
     needs: [build]
