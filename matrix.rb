@@ -4,7 +4,7 @@ require 'json'
 INDEX = URI('https://raw.githubusercontent.com/ruby/setup-ruby/refs/heads/master/ruby-builder-versions.json')
 
 index = JSON.parse(INDEX.open(&:read))
-crubies = index['ruby'].grep(/\A3\./).group_by {|v| v[/\A\d+\.\d+/] }.values.map(&:last)[-2,2]
+crubies = index['ruby'].grep(/\A3\./).group_by {|v| v[/\A\d+\.\d+/] }.values.map(&:last)
 
 ubuntu_compilers = [
   { cc: 'clang', cxx: 'clang++' },
