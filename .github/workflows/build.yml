@@ -54,13 +54,13 @@ jobs:
           env
       - name: Build Ruby
         run: |
-          prefix="${HOME}/.rubies/${RUBYVER}+${CC}"
-          mkdir -p "$prefix"
-          ./ruby-build/bin/ruby-build "$RUBYVER" "$prefix"
-          tar cPf ruby.tar.zst "$prefix"
+          mkdir -p "$PREFIX"
+          ./ruby-build/bin/ruby-build "$RUBYVER" "$PREFIX"
+          tar cf ruby.tar.zst -C "$PREFIX" .
           oras push --artifact-type=application/x-tar+zstd "$TAG" ruby.tar.zst
         env:
           RUBYVER: ${{ matrix.ruby }}
+          PREFIX: ${{ matrix.install_prefix }}
           TAG: ${{ matrix.artifact_tag }}
 
   commit:

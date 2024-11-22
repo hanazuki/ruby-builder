@@ -32,6 +32,7 @@ matrix = matrix.map {|h|
   cc = h[:compilers].fetch(:cc)
   h.merge(
     artifact_tag: "ghcr.io/hanazuki/ruby-builder:ruby-#{ruby}_#{runner}_#{cc}",
+    install_prefix: "#{ENV['HOME']}/.rubies/#{ruby}+#{cc}",
   )
 }
 
