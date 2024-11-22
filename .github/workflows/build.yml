@@ -1,0 +1,82 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      json: ${{ steps.read-matrix.outputs.json }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read-matrix
+        run: |
+          ruby ./matrix.rb > matrix.json
+          echo "json=$(cat matrix.json)" >>"$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: matrix
+          path: matrix.json
+          if-no-files-found: error
+          retention-days: 1
+
+  build:
+    needs:
+      - matrix
+    strategy:
+      fail-fast: true
+      matrix:
+        include: ${{fromJson(needs.matrix.outputs.json)}}
+    runs-on: ${{ matrix.runner }}
+    env:
+      CC: ${{ matrix.compilers.cc }}
+      CXX: ${{ matrix.compilers.cxx }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: 'rbenv/ruby-build'
+          path: ruby-build
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::665474295387:role/gha-ruby-builder
+          aws-region: us-east-2
+      - name: Print env
+        run: |
+          env
+      - name: Build Ruby
+        run: |
+          if aws s3 ls s3://hanazuki-ruby-builder-artifacts/"$KEY".tar.zst; then
+            echo "Build skipped"
+          else
+            ./ruby-build/bin/ruby-build "$RUBYVER" ruby
+            tar cf "$KEY".tar.zst -C ruby .
+            aws s3 cp ./"$KEY".tar.zst s3://hanazuki-ruby-builder-artifacts
+          fi
+        env:
+          RUBYVER: ${{ matrix.ruby }}
+          KEY: ${{ matrix.artifact_key }}
+
+  upload:
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: matrix
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::665474295387:role/gha-ruby-builder
+          aws-region: us-east-2
+      - name: Upload artifact index
+        run: |
+          aws s3 cp ./matrix.json s3://hanazuki-ruby-builder-artifacts
