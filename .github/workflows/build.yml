@@ -56,7 +56,7 @@ jobs:
         run: |
           mkdir -p "$PREFIX"
           ./ruby-build/bin/ruby-build "$RUBYVER" "$PREFIX"
-          tar cf ruby.tar.zst -C "$PREFIX" .
+          tar acf ruby.tar.zst -C "$PREFIX" .
           oras push --artifact-type=application/x-tar+zstd "$TAG" ruby.tar.zst
         env:
           RUBYVER: ${{ matrix.ruby }}
