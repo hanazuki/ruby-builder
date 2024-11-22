@@ -1,10 +1,14 @@
 require 'open-uri'
 require 'json'
 
+MIN = Gem::Version.new('3.2')
+
 INDEX = URI('https://raw.githubusercontent.com/ruby/setup-ruby/refs/heads/master/ruby-builder-versions.json')
 
 index = JSON.parse(INDEX.open(&:read))
-crubies = index['ruby'].grep(/\A3\./).group_by {|v| v[/\A\d+\.\d+/] }.values.map(&:last)
+crubies = index['ruby'].filter do |v|
+  Gem::Version.new(v) >= MIN rescue nil
+end.group_by {|v| v[/\A\d+\.\d+/] }.values.map(&:last)
 
 ubuntu_compilers = [
   { cc: 'clang', cxx: 'clang++' },

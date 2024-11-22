@@ -28,7 +28,7 @@ jobs:
     needs:
       - matrix
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include: ${{fromJson(needs.matrix.outputs.json)}}
     runs-on: ${{ matrix.runner }}
