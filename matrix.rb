@@ -26,6 +26,14 @@ matrix = runners.flat_map {|runner, compilers|
   [{ runner: runner, compilers: compilers }].product(crubies).map {|h, ruby| h.merge(ruby: ruby) }
 }
 
-matrix = matrix.map {|h| h.merge(artifact_key: "ruby-#{h[:ruby]}_#{h[:runner]}_#{h[:compilers][:cc]}") }
+matrix = matrix.map {|h|
+  runner = h.fetch(:runner)
+  ruby = h.fetch(:ruby)
+  cc = h[:compilers].fetch(:cc)
+  h.merge(
+    artifact_tag: "ruby-#{ruby}_#{runner}_#{cc}}",
+    install_prefix: "#{ENV['HOME']}/.rubies/#{ruby}+#{cc}",
+  )
+}
 
 puts JSON.dump(matrix)
