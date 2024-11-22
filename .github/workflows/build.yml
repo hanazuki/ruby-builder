@@ -61,16 +61,22 @@ jobs:
           RUBYVER: ${{ matrix.ruby }}
           KEY: ${{ matrix.artifact_tag }}
 
-  upload:
+  commit:
     needs: [build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      - name: gitconfig
+        run: |
+          git config --global user.email automate@hanazuki.dev
+          git config --global user.name automate
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: matrix
-      - uses: oras-project/setup-oras@v1
-      - name: Upload artifact index
+      - name: Git commit
         run: |
-          oras push ghcr.io/hanazuki/ruby-builder:matrix matrix.json:application/json
+          git add -A
+          git commit -m 'Update matrix.json'
+          git push origin master
