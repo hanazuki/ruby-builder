@@ -54,7 +54,8 @@ jobs:
           env
       - name: Build Ruby
         run: |
-          ./ruby-build/bin/ruby-build "$RUBYVER" ruby
+          prefix="${HOME}/.rubies/${RUBYVER}+${CC}"
+          ./ruby-build/bin/ruby-build "$RUBYVER" ${prefix}
           tar cf "$KEY".tar.zst -C ruby .
           oras push --artifact-type=application/x-tar+zstd ghcr.io/hanazuki/ruby-builder:"$KEY" "$KEY".tar.zst
         env:
