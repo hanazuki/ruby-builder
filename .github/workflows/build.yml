@@ -63,7 +63,7 @@ jobs:
             mkdir -p "$PREFIX"
             ./ruby-build/bin/ruby-build "$RUBYVER" "$PREFIX"
             tar acf ruby.tar.zst -C "$PREFIX" .
-            ruby -rjson 'puts JSON.dump(install_prefix: ARGV[0])' "$PREFIX" >config.json
+            ruby -rjson -e 'puts JSON.dump(install_prefix: ARGV[0])' "$PREFIX" >config.json
             oras push --config config.json "$TAG" ruby.tar.zst:application/x-tar+zstd
           fi
         env:
