@@ -49,18 +49,25 @@ jobs:
           printenv GITHUB_TOKEN | oras login ghcr.io --username gh --password-stdin
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Print env
+      - name: Compiler versions
         run: |
-          env
+          set +x
+          "$CC" --version
+          "$CXX" --version
       - name: Build Ruby
         run: |
-          mkdir -p "$PREFIX"
-          ./ruby-build/bin/ruby-build "$RUBYVER" "$PREFIX"
-          tar acf ruby.tar.zst -C "$PREFIX" .
-          oras push --artifact-type=application/x-tar+zstd "$TAG" ruby.tar.zst
+          if oras manifest fetch "$TAG"; then
+            echo "Skip building"
+          else
+            PREFIX="${HOME}/.rubies/${RUBYVER}+${CC}"
+            mkdir -p "$PREFIX"
+            ./ruby-build/bin/ruby-build "$RUBYVER" "$PREFIX"
+            tar acf ruby.tar.zst -C "$PREFIX" .
+            ruby -rjson 'puts JSON.dump(install_prefix: ARGV[0])' "$PREFIX" >config.json
+            oras push --config config.json "$TAG" ruby.tar.zst:application/x-tar+zstd
+          fi
         env:
           RUBYVER: ${{ matrix.ruby }}
-          PREFIX: ${{ matrix.install_prefix }}
           TAG: ${{ matrix.artifact_tag }}
 
   commit:
