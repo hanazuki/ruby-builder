@@ -86,7 +86,7 @@ jobs:
           name: matrix
       - name: Git commit
         run: |
-          if ! git diff -q; then
+          if ! git diff --quiet; then
             git add -A
             git commit -m 'Update matrix.json'
             git push origin master
