@@ -20,7 +20,7 @@ macos_compilers = [
   { cc: 'gcc-14', cxx: 'g++-14' },
 ]
 
-runners = %w[ubuntu-24.04].product(ubuntu_compilers) + %w[macos-15].product(macos_compilers)
+runners = %w[ubuntu-24.04 ubuntu-24.04-arm].product(ubuntu_compilers) + %w[macos-15].product(macos_compilers)
 
 
 matrix = runners.flat_map {|runner, compilers|
