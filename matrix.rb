@@ -7,6 +7,7 @@ INDEX = URI('https://raw.githubusercontent.com/ruby/setup-ruby/refs/heads/master
 
 index = JSON.parse(INDEX.open(&:read))
 crubies = index['ruby'].filter do |v|
+  next if v =~ /asan/
   Gem::Version.new(v) >= MIN rescue nil
 end.group_by {|v| v[/\A\d+\.\d+/] }.values.map(&:last)
 
