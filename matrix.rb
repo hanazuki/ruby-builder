@@ -36,4 +36,4 @@ matrix = matrix.map {|h|
   )
 }
 
-puts JSON.pretty_generate(matrix)
+puts JSON.dump(matrix)
