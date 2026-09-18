@@ -1,7 +1,7 @@
 require 'open-uri'
 require 'json'
 
-MIN = Gem::Version.new('3.2')
+MIN = Gem::Version.new('3.3')
 
 INDEX = URI('https://raw.githubusercontent.com/ruby/setup-ruby/refs/heads/master/ruby-builder-versions.json')
 
